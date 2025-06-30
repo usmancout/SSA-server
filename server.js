@@ -8,12 +8,15 @@ const cors = require('cors');
 
 // ✅ CORS config — only allow your deployed frontend origin
 app.use(cors({
-  origin: 'https://endearing-crostata-89c2a0.netlify.app',
+  origin: ['https://endearing-crostata-89c2a0.netlify.app'],
   credentials: true
 }));
 
+
 app.use(express.json());
 app.use("/api/auth", routes);
+
+
 
 mongoDB();
 app.listen(port, () => {
