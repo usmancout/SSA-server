@@ -1,11 +1,10 @@
 const mongoose=require("mongoose")
 
-const URI= "mongodb://127.0.0.1:27017/shopsense";
 
 
 const connectDB=async()=>{
   try {
-    await mongoose.connect(URI);
+    await mongoose.connect(process.env.MONGO_URI)
     console.log("Connection successful");
 
 
