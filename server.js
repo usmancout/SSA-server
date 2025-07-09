@@ -14,20 +14,15 @@ const allowedOrigins = [
   process.env.CLIENT_URL_PROD
 ];
 
-// ✅ CORS configuration
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, or internal server-to-server)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS blocked: origin ${origin} is not allowed`));
-    }
-  },
+  origin: [
+    'https://endearing-crostata-89c2a0.netlify.app'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 };
+
 
 // ✅ Apply CORS middleware
 app.use(cors(corsOptions));
