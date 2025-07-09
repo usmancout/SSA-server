@@ -4,6 +4,7 @@ require('dotenv').config();
 const mongoDB = require('./utils/db');
 const routes = require('./router/auth-router');
 
+
 const app = express();
 const port = process.env.PORT || 5000;
 
