@@ -11,19 +11,21 @@ const routes = require('./router/auth-router');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Allowed origins for CORS (from environment)
+// ✅ Allowed origins (read from .env OR hardcoded for now)
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  process.env.CLIENT_URL_PROD
+  process.env.CLIENT_URL_PROD,
+  'https://endearing-crostata-89c2a0.netlify.app' // in case env isn't picked up
 ];
 
 // ✅ CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log('🌐 Incoming Origin:', origin);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`❌ CORS blocked: origin ${origin} is not allowed`));
+      callback(new Error(`❌ CORS blocked: ${origin} not allowed`));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -31,22 +33,23 @@ const corsOptions = {
   credentials: true
 };
 
-// ✅ Middleware
+// ✅ Apply CORS middleware
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // For preflight requests
+app.options('*', cors(corsOptions)); // Preflight request support
 
-app.use(express.json()); // Parse JSON bodies
+// ✅ Body parser middleware
+app.use(express.json());
 
-// ✅ API Routes
+// ✅ API routes
 app.use('/api/auth', routes);
 
-// ✅ 404 Fallback
+// ✅ 404 Fallback handler
 app.use((req, res) => {
   res.status(404).json({ message: '❌ Route not found' });
 });
 
-// ✅ Connect to MongoDB & start the server
-mongoDB();
+// ✅ Connect to MongoDB & start server
+mongoDB(); // Your db connection logic (in utils/db.js)
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
