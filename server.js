@@ -5,7 +5,7 @@ const mongoDB = require('./utils/db');
 const routes = require('./router/auth-router');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 app.options('*', (req, res) => {
   res.header('Access-Control-Allow-Origin', req.headers.origin);
