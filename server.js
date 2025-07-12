@@ -7,32 +7,25 @@ const routes = require('./router/auth-router');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ CORS config — allow everything for now
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // ⚠️ Change * to your domain later
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'https://endearing-crostata-89c2a0.netlify.app/'
+  ],
+  methods: 'GET,POST,PUT,DELETE,OPTIONS',
+  allowedHeaders: 'Content-Type, Authorization',
+  credentials: true,
+};
 
-// ✅ Body parser
+app.use(cors(corsOptions));
 app.use(express.json());
-
-// ✅ Routes
 app.use('/api/auth', routes);
-
-// ✅ 404 handler
 app.use((req, res) => {
-  res.status(404).json({ message: '❌ Route not found' });
+  res.status(404).json({ message: 'Route not found' });
 });
 
-// ✅ Mongo & start server
 mongoDB();
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
