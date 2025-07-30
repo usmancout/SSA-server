@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   location: { type: String },
   bio: { type: String },
-  avatar: { type: String }
+  avatar: { type: String },
+  isGoogleAccount: { type: Boolean, default: false }  // 💥 add this line
 });
 
 const User = mongoose.model('User', userSchema);
