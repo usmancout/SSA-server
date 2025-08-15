@@ -19,7 +19,7 @@ app.options('*', (req, res) => {
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://endearing-crostata-89c2a0.netlify.app'
+    'https://shop-sense-ai-mu.vercel.app/'
   ],
   credentials: true,
 }));
