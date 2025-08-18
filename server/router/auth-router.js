@@ -32,6 +32,10 @@ const upload = multer({
   }
 });
 
+router.get("/", (req, res) => {
+  res.send("Hello World from Home");
+});
+
 // Helper function to authenticate user with JWT
 const authenticate = (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
