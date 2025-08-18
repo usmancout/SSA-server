@@ -20,7 +20,7 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://shop-sense-ai-mu.vercel.app/'
+    'https://shop-sense-ai-mu.vercel.app'
   ],
   credentials: true,
 }));
