@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const nodemailer = require('nodemailer'); // for sending emails
-
+const fs = require('fs'); // Add this at the top with other requires
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -58,25 +58,36 @@ router.put('/avatar', authenticate, upload.single('avatar'), async (req, res) =>
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    const avatarUrl = `http://localhost:5000/uploads/${req.file.filename}`; // Use absolute URL
+
+    const baseUrl = process.env.NODE_ENV === 'production'
+        ? `https://ssa-serverr.onrender.com/uploads/`
+        : `http://localhost:5000/uploads/`;
+    const avatarUrl = `${baseUrl}${req.file.filename}`;
+
     const updatedUser = await User.findByIdAndUpdate(
         req.user.userId,
         { avatar: avatarUrl },
         { new: true }
     );
+
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
+
     res.status(200).json({
       message: 'Avatar updated successfully',
-      avatar: avatarUrl
+      avatar: avatarUrl,
     });
   } catch (error) {
     console.error('Avatar upload error:', error);
     if (error.message.includes('Only JPEG and PNG')) {
       return res.status(400).json({ message: error.message });
     }
-    res.status(500).json({ message: 'Server error' });
+    // Handle file system or other specific errors
+    if (error.code === 'ENOENT') {
+      return res.status(500).json({ message: 'Upload directory error' });
+    }
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
