@@ -11,12 +11,16 @@ const fs = require('fs'); // Add this at the top with other requires
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    const uploadDir = 'uploads/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, `${uniqueSuffix}-${file.originalname}`);
-  }
+  },
 });
 const upload = multer({
   storage,
@@ -29,7 +33,7 @@ const upload = multer({
       return cb(null, true);
     }
     cb(new Error('Only JPEG and PNG images are allowed'));
-  }
+  },
 });
 
 router.get("/", (req, res) => {
