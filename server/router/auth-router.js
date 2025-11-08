@@ -56,7 +56,6 @@ const authenticate = (req, res, next) => {
 };
 
 // Avatar upload route
-// router.js (only the /avatar route)
 router.put('/avatar', authenticate, upload.single('avatar'), async (req, res) => {
   try {
     if (!req.file) {
@@ -371,7 +370,6 @@ router.post('/reset-password/:token', async (req, res) => {
 
 //routes for dashboard and wishlist
 
-// Add these routes to your existing router.js file
 
 // Get user dashboard data
 router.get('/dashboard', authenticate, async (req, res) => {
