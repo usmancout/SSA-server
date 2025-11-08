@@ -24,7 +24,6 @@ class AuthController {
       return res.status(500).json({ message: 'Server error' });
     }
   }
-
   async login(req, res) {
     const { email, password } = req.body;
 
@@ -42,7 +41,6 @@ class AuthController {
       return res.status(500).json({ message: 'Server error' });
     }
   }
-
   async googleLogin(req, res) {
     const { access_token } = req.body;
 
