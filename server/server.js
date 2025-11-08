@@ -1,17 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const mongoDB = require('./utils/db');
-const routes = require('./router/auth-router');
+const connectDB = require('./config/database');
+const routes = require('./routes');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Added fallback port
+const PORT = process.env.PORT || 5000;
 
-// Middlewares
-app.use(express.json()); // Parse JSON bodies first
-app.use('/uploads', express.static('uploads')); // Static files
+app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
-// Enhanced CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -20,7 +19,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -33,22 +31,15 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Routes
 app.use('/api/auth', routes);
 
-// 404 Handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Error Handler (add this after all middleware/routes)
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Internal Server Error' });
-});
+app.use(errorHandler);
 
-// Database connection and server start
-mongoDB().then(() => {
+connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);

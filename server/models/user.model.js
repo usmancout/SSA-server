@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
     avatar: { type: String },
     isGoogleAccount: { type: Boolean, default: false },
 
-    // New fields for user data
     searchHistory: [{
         query: String,
         category: String,
@@ -42,7 +41,7 @@ const userSchema = new mongoose.Schema({
     }],
 
     activity: [{
-        activityType: {  // Changed from 'type' to 'activityType' to avoid conflict
+        activityType: {
             type: String,
             enum: ['search', 'wishlist_add', 'wishlist_remove', 'product_view'],
             required: true
@@ -68,6 +67,4 @@ const userSchema = new mongoose.Schema({
     }]
 });
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);
