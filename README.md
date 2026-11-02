@@ -1,4 +1,4 @@
-# ⚙️ ShopSense AI — Backend Server & Hugging Face BERT Engine (`SSA-server`)
+# ShopSense AI — Backend Server & Hugging Face BERT Engine (`SSA-server`)
 
 This repository contains the **Node.js + Express + MongoDB** backend for **ShopSense AI**, including:
 - **50 Seeded Products Across 4 Local Marts** (`Martello Downtown`, `Martello West`, `Prodexa Central`, `Storenta Plaza`) with varied stock availability, prices, and GPS coordinates (`lat`, `lng`).
@@ -7,7 +7,7 @@ This repository contains the **Node.js + Express + MongoDB** backend for **ShopS
 
 ---
 
-## 🧠 How BERT Works in `SSA-server`
+## How BERT Works in `SSA-server`
 
 1. **Model:** `Xenova/distilbert-base-uncased-finetuned-sst-2-english` (6-layer, 66M-parameter DistilBERT Transformer running locally in Node.js—no external API key required).
 2. **Inference Pipeline (`server/services/bert.service.js`):**
@@ -18,7 +18,7 @@ This repository contains the **Node.js + Express + MongoDB** backend for **ShopS
 
 ---
 
-## 🔌 API Routes
+## API Routes
 
 - `GET /api/products` — Search & filter all 50 products (`?q=`, `?category=`, `?store=`, `?martId=`)
 - `GET /api/marts` — List all 4 marts with GPS coordinates & addresses
@@ -29,7 +29,7 @@ This repository contains the **Node.js + Express + MongoDB** backend for **ShopS
 
 ---
 
-## 🚀 Run Locally
+## Run Locally
 
 ```bash
 cd server
