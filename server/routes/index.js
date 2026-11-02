@@ -5,6 +5,7 @@ const authRoutes = require('./auth.routes');
 const profileRoutes = require('./profile.routes');
 const wishlistRoutes = require('./wishlist.routes');
 const dashboardRoutes = require('./dashboard.routes');
+const productRoutes = require('./product.routes');
 
 router.get('/', (req, res) => {
   res.send('Hello World from Home');
@@ -14,5 +15,6 @@ router.use('/', authRoutes);
 router.use('/', profileRoutes);
 router.use('/', wishlistRoutes);
 router.use('/', dashboardRoutes);
+router.use('/', productRoutes);
 
 module.exports = router;

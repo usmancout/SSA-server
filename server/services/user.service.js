@@ -1,4 +1,5 @@
 const User = require('../models/user.model');
+const productService = require('./product.service');
 
 class UserService {
   async getProfile(userId) {
@@ -99,6 +100,14 @@ class UserService {
 
     user.viewedProducts = user.viewedProducts.slice(0, 100);
 
+    if (!user.activity) user.activity = [];
+    user.activity.unshift({
+      activityType: 'product_view',
+      description: `Viewed "${productData.name}"`,
+      timestamp: new Date()
+    });
+    user.activity = user.activity.slice(0, 100);
+
     await user.save();
     return { message: 'Product view recorded' };
   }
@@ -109,15 +118,24 @@ class UserService {
       throw new Error('User not found');
     }
 
+    const recommendations = (user.recommendations && user.recommendations.length > 0)
+      ? user.recommendations
+      : await productService.getRecommendationsForUser(user);
+
     return {
       stats: {
         totalSearches: user.searchHistory?.length || 0,
         wishlistItems: user.wishlist?.length || 0,
         productsViewed: user.viewedProducts?.length || 0
       },
-      recentSearches: user.searchHistory?.slice(-5) || [],
-      recentActivity: user.activity?.slice(-10) || [],
-      recommendations: user.recommendations || []
+      recentSearches: user.searchHistory?.slice(0, 5) || [],
+      recentActivity: (user.activity?.slice(0, 10) || []).map(item => ({
+        type: item.activityType,
+        activityType: item.activityType,
+        description: item.description,
+        timestamp: item.timestamp
+      })),
+      recommendations
     };
   }
 }
