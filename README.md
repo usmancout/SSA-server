@@ -1,8 +1,10 @@
 # ShopSense AI — Backend Server & Hugging Face BERT Engine (`SSA-server`)
 
 This repository contains the **Node.js + Express + MongoDB** backend for **ShopSense AI**, including:
-- **50 Seeded Products Across 4 Local Marts** (`Martello Downtown`, `Martello West`, `Prodexa Central`, `Storenta Plaza`) with varied stock availability, prices, and GPS coordinates (`lat`, `lng`).
+- **50+ Seeded Products per Mart Across 4 Local Marts** (`Martello Downtown`: 56 products, `Martello West`: 52 products, `Prodexa Central`: 60 products, `Storenta Plaza`: 55 products) with varied stock availability, prices, product-matched studio illustrations (`server/services/productImage.helper.js`), and GPS coordinates (`lat`, `lng`).
+- **Conversational & Multi-Item Natural Language Search Parser** (`server/services/product.service.js`) supporting queries such as `"I want Nike shoes and a shirt"` or `"laptop under $1500"`.
 - **Real Hugging Face BERT Review Authenticity Classifier** (`@xenova/transformers` running `Xenova/distilbert-base-uncased-finetuned-sst-2-english` via ONNX Runtime) in `server/services/bert.service.js`.
+- **Conversational AI Assistant Endpoint (`POST /api/chat`)** for product discovery, budget filtering, and review verification.
 - **JWT User Authentication, Wishlist, Search History & Personalized Recommendations**.
 
 ---
@@ -20,12 +22,13 @@ This repository contains the **Node.js + Express + MongoDB** backend for **ShopS
 
 ## API Routes
 
-- `GET /api/products` — Search & filter all 50 products (`?q=`, `?category=`, `?store=`, `?martId=`)
+- `GET /api/products` — Search & filter catalog (supports conversational `?q=`, `?category=`, `?store=`, `?martId=`)
 - `GET /api/marts` — List all 4 marts with GPS coordinates & addresses
 - `GET /api/stores/:storeName/products` — Store-specific product API (`martello`, `prodexa`, `storenta`)
 - `POST /api/reviews/analyze` — Live Hugging Face BERT review classification endpoint
-- `POST /api/auth/signup` & `POST /api/auth/signin` — User authentication
-- `GET /api/user/dashboard` — User dashboard, wishlist, search history & recommendations
+- `POST /api/chat` — Conversational AI Shopping Assistant endpoint
+- `POST /api/auth/signup` & `POST /api/auth/login` — Customer authentication
+- `GET /api/auth/dashboard` — User dashboard, wishlist, search history & recommendations
 
 ---
 
