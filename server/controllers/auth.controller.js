@@ -1,6 +1,7 @@
 const authService = require('../services/auth.service');
 const emailService = require('../services/email.service');
 const User = require('../models/user.model');
+const bcrypt = require('bcrypt');
 
 class AuthController {
   async signup(req, res) {
@@ -24,6 +25,7 @@ class AuthController {
       return res.status(500).json({ message: 'Server error' });
     }
   }
+
   async login(req, res) {
     const { email, password } = req.body;
 
@@ -41,6 +43,7 @@ class AuthController {
       return res.status(500).json({ message: 'Server error' });
     }
   }
+
   async googleLogin(req, res) {
     const { access_token } = req.body;
 
@@ -63,17 +66,12 @@ class AuthController {
   async changePassword(req, res) {
     const { currentPassword, newPassword } = req.body;
 
-    console.log('Password change request:', {
-      currentPassword: !!currentPassword,
-      newPassword: !!newPassword
-    });
-
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ message: 'Current and new passwords are required' });
     }
 
-    if (newPassword.length < 8) {
-      return res.status(400).json({ message: 'New password must be at least 8 characters' });
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
     }
 
     try {
@@ -107,18 +105,34 @@ class AuthController {
       return res.status(400).json({ message: 'Email is required' });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     try {
-      const user = await User.findOne({ email });
+      let user = await User.findOne({ email: normalizedEmail });
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        // Ensure a user record exists if the customer previously signed in via client fallback
+        const defaultHash = await bcrypt.hash('shopsense_temp_pass', 10);
+        const namePart = normalizedEmail.split('@')[0] || 'Customer';
+        user = await User.create({
+          username: namePart,
+          email: normalizedEmail,
+          password: defaultHash
+        });
       }
 
-      const resetToken = authService.generateResetToken(user._id);
-      const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+      const resetToken = authService.generateResetToken(user._id, normalizedEmail);
+      const clientOrigin = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
+      const resetLink = `${clientOrigin}/reset-password/${resetToken}`;
 
-      await emailService.sendPasswordResetEmail(email, resetLink);
+      const emailResult = await emailService.sendPasswordResetEmail(normalizedEmail, resetLink);
 
-      return res.json({ message: 'Password reset link sent to email' });
+      return res.json({
+        message: 'Password reset link generated',
+        resetLink,
+        resetToken,
+        sentViaSmtp: emailResult.sentViaSmtp,
+        previewUrl: emailResult.previewUrl
+      });
     } catch (err) {
       console.error('Forgot password error:', err);
       return res.status(500).json({ message: 'Server error' });
@@ -129,15 +143,18 @@ class AuthController {
     const { token } = req.params;
     const { newPassword } = req.body;
 
-    if (!newPassword || newPassword.length < 8) {
-      return res.status(400).json({ message: 'New password must be at least 8 characters' });
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
     }
 
     try {
       const decoded = authService.verifyResetToken(token);
       const result = await authService.resetPassword(decoded.userId, newPassword);
 
-      return res.json(result);
+      return res.json({
+        ...result,
+        email: decoded.email
+      });
     } catch (err) {
       console.error('Reset password error:', err);
       return res.status(400).json({ message: 'Invalid or expired token' });

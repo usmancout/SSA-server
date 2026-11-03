@@ -108,9 +108,9 @@ class AuthService {
     return { message: 'Password updated successfully' };
   }
 
-  generateResetToken(userId) {
+  generateResetToken(userId, email) {
     return jwt.sign(
-      { userId },
+      { userId, email },
       JWT_SECRET,
       { expiresIn: RESET_TOKEN_EXPIRES_IN }
     );
