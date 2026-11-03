@@ -1,6 +1,7 @@
 const Product = require('../models/product.model');
 const { analyzeReviewsWithRealBERT, BERT_MODEL_ID } = require('./bert.service');
 const { createProductImage } = require('./productImage.helper');
+const { vectorDbService } = require('./vectorDb.service');
 
 const MARTS = [
   { id: 'mart1', store: 'Martello', name: 'Martello Downtown', address: 'Johar Town Main Blvd, Lahore', lat: 31.4697, lng: 74.2728, rating: 4.7 },
@@ -241,7 +242,7 @@ const INITIAL_PRODUCTS = RAW_CATALOG.map((item, idx) => {
     brand: item.brand,
     category: item.category,
     description: item.description,
-    image: createProductImage(item.name, item.brand, item.category, item.icon, bgStart, bgEnd, accent),
+    image: createProductImage(item.name, item.brand, item.category, item.icon, bgStart, bgEnd, accent, item.id),
     rating: item.rating,
     reviewCount: item.reviewCount,
     features: item.features,
@@ -405,14 +406,20 @@ class ProductService {
       try {
         const count = await Product.countDocuments();
         const sample = await Product.findOne({ productId: 'prod-iphone-16-pro-max' }).lean();
-        const hasSvgStudioImage = sample?.image?.startsWith('data:image/svg+xml');
+        const hasRealPhotoImage = sample?.image?.startsWith('https://images.unsplash.com');
 
-        if (count !== INITIAL_PRODUCTS.length || !hasSvgStudioImage) {
+        if (count !== INITIAL_PRODUCTS.length || !hasRealPhotoImage) {
           console.log(`🔄 Running real Hugging Face BERT (${BERT_MODEL_ID}) on ${INITIAL_PRODUCTS.length} products across 4 marts (50+ products per mart)...`);
           const enriched = await this.enrichProductsWithBERT(INITIAL_PRODUCTS);
           await Product.deleteMany({});
           await Product.insertMany(enriched);
-          console.log(`✅ Seeded ${INITIAL_PRODUCTS.length} products across 4 marts (each mart has 50+ products) with real Hugging Face BERT!`);
+          console.log(`✅ Seeded ${INITIAL_PRODUCTS.length} products across 4 marts (each mart has 50+ products) with real-life images & BERT!`);
+        }
+
+        if (!vectorDbService.getStatus().initialized) {
+          const allDocs = await Product.find({}).lean();
+          const allFormatted = allDocs.map(doc => this.formatProduct(doc));
+          await vectorDbService.indexMartProducts(allFormatted);
         }
       } finally {
         this.seedingPromise = null;
@@ -509,6 +516,17 @@ class ProductService {
     }
 
     return formatted;
+  }
+
+  async ragSearchProducts(rawQuery = '', options = {}) {
+    await this.seedIfEmpty();
+    const docs = await Product.find({}).lean();
+    const allFormatted = docs.map(doc => this.formatProduct(doc));
+    return vectorDbService.retrieveProductsRAG(rawQuery, allFormatted, options);
+  }
+
+  getVectorDbStatus() {
+    return vectorDbService.getStatus();
   }
 
   async getRecommendationsForUser(user) {
