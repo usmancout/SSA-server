@@ -1,4 +1,4 @@
-# ShopSense AI — Backend Server, RAG Vector DB & Hugging Face BERT Engine (`SSA-server`)
+# ShopSense AI Backend Server, RAG Vector DB & Hugging Face BERT Engine (`SSA-server`)
 
 This repository contains the **Node.js + Express + MongoDB** backend for **ShopSense AI**, including:
 - **80 Seeded Products Across 4 Local Marts (50+ Products per Mart)** (`Martello Downtown`: 56 products, `Martello West`: 52 products, `Prodexa Central`: 60 products, `Storenta Plaza`: 55 products) with varied stock availability, prices, real-life product photography (`server/services/productImage.helper.js`), and GPS coordinates (`lat`, `lng`).
