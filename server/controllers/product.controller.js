@@ -107,20 +107,8 @@ class ProductController {
       });
 
       const retrieved = ragResult.products || [];
-      let ragReply = '';
-      if (retrieved.length > 0) {
-        const top = retrieved[0];
-        const offers = top.offers || [];
-        const trustedOffer =
-          [...offers].sort(
-            (a, b) => (b.bertTrustScore ?? 75) - (a.bertTrustScore ?? 75) || a.price - b.price
-          )[0] || offers[0];
-        const budgetNote = maxBudget !== null ? ` under **$${maxBudget}**` : '';
-        ragReply = `Retrieved **${ragResult.totalMatches}** match${ragResult.totalMatches === 1 ? '' : 'es'}${budgetNote} from the Vector DB (**${Math.round((ragResult.ragMetadata?.topHybridScore || 0.92) * 100)}%** RAG match). Top pick: **${top.name}** at **${trustedOffer?.martName || top.martName}** (**$${trustedOffer?.price ?? top.price}**).`;
-      }
 
       res.status(200).json({
-        reply: ragReply || undefined,
         products: retrieved,
         totalMatches: ragResult.totalMatches,
         maxBudget,
