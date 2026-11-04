@@ -406,17 +406,18 @@ class ProductService {
       try {
         const count = await Product.countDocuments();
         const sample = await Product.findOne({ productId: 'prod-iphone-16-pro-max' }).lean();
-        const hasRealPhotoImage = sample?.image?.startsWith('https://images.unsplash.com');
+        const hasExactProductImage = sample?.image === '/products/prod-iphone-16-pro-max.jpg';
 
-        if (count !== INITIAL_PRODUCTS.length || !hasRealPhotoImage) {
+        if (count !== INITIAL_PRODUCTS.length || !hasExactProductImage) {
           console.log(`🔄 Running real Hugging Face BERT (${BERT_MODEL_ID}) on ${INITIAL_PRODUCTS.length} products across 4 marts (50+ products per mart)...`);
           const enriched = await this.enrichProductsWithBERT(INITIAL_PRODUCTS);
           await Product.deleteMany({});
           await Product.insertMany(enriched);
-          console.log(`✅ Seeded ${INITIAL_PRODUCTS.length} products across 4 marts (each mart has 50+ products) with real-life images & BERT!`);
-        }
-
-        if (!vectorDbService.getStatus().initialized) {
+          console.log(`✅ Seeded ${INITIAL_PRODUCTS.length} products across 4 marts (each mart has 50+ products) with exact product images & BERT!`);
+          const allDocs = await Product.find({}).lean();
+          const allFormatted = allDocs.map(doc => this.formatProduct(doc));
+          await vectorDbService.indexMartProducts(allFormatted);
+        } else if (!vectorDbService.getStatus().initialized) {
           const allDocs = await Product.find({}).lean();
           const allFormatted = allDocs.map(doc => this.formatProduct(doc));
           await vectorDbService.indexMartProducts(allFormatted);
